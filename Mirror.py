@@ -37,8 +37,10 @@ def logins():
 
   # print(reddit.user.me())
 
+
 def progress(current, total):
   print("{:.1f}%".format(current * 100 / total))
+
 
 def post_submission_to_telegram(sub):
   post_title = sub.title
@@ -90,6 +92,7 @@ def post_submission_to_telegram(sub):
   os.remove(raw_file)
   os.remove(ff_output)  
 
+
 def update_post_score(sub):
   message_id = -1
   with open(f'./db/{sub.id}', 'r') as f:
@@ -105,6 +108,7 @@ def update_post_score(sub):
     
     with Client("my_account", telegram_api_id, telegram_api_hash) as app:
       app.edit_message_caption(telegram_channel_id, message_id, caption=post_string, parse_mode="markdown")
+
 
 def beat():
   for sub in reddit.subreddit('gamephysics').hot(limit=40):
@@ -122,10 +126,12 @@ def beat():
       except Exception as ex:
         print(ex)
 
+
 def main():
   print("Starting ...")
   logins()
   beat()
+
 
 if __name__ == "__main__":
   main()
