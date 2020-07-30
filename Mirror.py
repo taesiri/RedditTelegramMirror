@@ -10,7 +10,7 @@ import ffmpeg
 # Telegram 
 telegram_api_id = 0
 telegram_api_hash = ""
-telegram_channel_name = gamephysics
+telegram_channel_name = "channel_name_here"
 telegram_channel_id = '-1'
 # Reddit
 reddit_client_id     = ""
