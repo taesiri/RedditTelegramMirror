@@ -26,7 +26,7 @@ def logins():
 
     # Get Telegram Channel ID for posts
     idd = app.get_chat(telegram_channel_name)
-    telegram_channel_id = idd
+    telegram_channel_id = idd['id']
 
   # Log into Reddit
   reddit = praw.Reddit(client_id=reddit_client_id,
