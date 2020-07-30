@@ -51,7 +51,7 @@ def post_submission_to_telegram(sub):
   else:
     post_string = f'**{sub.title}** - (Score: {sub.score})'
 
-  post_string += '\n\n 🆔 @GamePhysics'
+  post_string += f'\n\n 🆔 @{telegram_channel_name}'
 
   # Youtube-DL
   raw_file = f'./videos/{sub.id}-RAW.mp4'
@@ -92,7 +92,7 @@ def post_submission_to_telegram(sub):
 
 def update_post_score(sub):
   message_id = -1
-  with open(f'/root/bots/RedditBot/db/{sub.id}', 'r') as f:
+  with open(f'./db/{sub.id}', 'r') as f:
     message_id = int(f.readline())
   
   if message_id>0:
@@ -108,7 +108,7 @@ def update_post_score(sub):
 
 def beat():
   for sub in reddit.subreddit('gamephysics').hot(limit=40):
-    if os.path.exists(f'/root/bots/RedditBot/db/{sub.id}'):
+    if os.path.exists(f'./db/{sub.id}'):
       # File Already Exists!
       try:
         print(f'Updating {sub.id}')
