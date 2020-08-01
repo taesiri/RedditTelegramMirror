@@ -19,6 +19,8 @@ reddit_password      = ""
 reddit_user_agent    = "mirror script by /u/taesiri"
 reddit_username      = ""
 
+subreddit_name       = "gamephysics"
+
 def logins():
   # Log into Telegram!
   with Client("my_account", telegram_api_id, telegram_api_hash) as app:
@@ -40,6 +42,14 @@ def logins():
 
 def progress(current, total):
   print("{:.1f}%".format(current * 100 / total))
+
+
+def HasAudioStreams( file_path ):
+  streams = ffmpeg.probe(file_path)["streams"]
+  for stream in streams:
+      if stream["codec_type"] == "audio":
+          return True
+  return False
 
 
 def post_submission_to_telegram(sub):
@@ -66,18 +76,25 @@ def post_submission_to_telegram(sub):
   ff_output = f'./videos/{sub.id}.mp4'
   
   in_stream = ffmpeg.input(raw_file)
-  audio_stream = in_stream.audio
   overlay_file = ffmpeg.input('./overlay.png')
+  processed_video = in_stream.filter('scale', 720, -2).overlay(overlay_file, y=335)
 
-  processed_video = in_stream.filter('scale', 640, -1).overlay(overlay_file, y=295)
-
-  (
-    ffmpeg
-    .concat(processed_video, audio_stream, v=1, a=1)
-    .output(ff_output, crf=26, preset='slower')
-    .overwrite_output()
-    .run()
-  )
+  if HasAudioStreams(raw_file):
+    audio_stream = in_stream.audio
+    (
+      ffmpeg
+        .concat(processed_video, audio_stream, v=1, a=1)
+        .output(ff_output, crf=26, preset='slower', pix_fmt="yuv420p")
+        .overwrite_output()
+        .run()
+    )
+  else:
+    (
+      ffmpeg
+        .output(processed_video, filename=ff_output, crf=26, preset='slower', pix_fmt="yuv420p")
+        .overwrite_output()
+        .run()
+    )
   
   # SEND to Telegram Channel
   sent_message = None
@@ -104,14 +121,14 @@ def update_post_score(sub):
     else:
       post_string = f'**{sub.title}** - (Score: {sub.score})'
     
-    post_string += '\n\n 🆔 @GamePhysics'
+    post_string += f'\n\n 🆔 @{telegram_channel_name}'
     
     with Client("my_account", telegram_api_id, telegram_api_hash) as app:
       app.edit_message_caption(telegram_channel_id, message_id, caption=post_string, parse_mode="markdown")
 
 
-def beat():
-  for sub in reddit.subreddit('gamephysics').hot(limit=40):
+def beat(reddit):
+  for sub in reddit.subreddit(subreddit_name).hot(limit=40):
     if os.path.exists(f'./db/{sub.id}'):
       # File Already Exists!
       try:
@@ -129,8 +146,8 @@ def beat():
 
 def main():
   print("Starting ...")
-  logins()
-  beat()
+  reddit = logins()
+  beat(reddit)
 
 
 if __name__ == "__main__":
